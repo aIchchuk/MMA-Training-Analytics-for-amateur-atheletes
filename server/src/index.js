@@ -29,6 +29,10 @@ app.get('/', (req, res) => {
   res.json({ message: 'Combat Analytics API - System Standby' });
 });
 
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/sessions', require('./routes/sessionRoutes'));
+
 // Database Connection
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mma_analytics';

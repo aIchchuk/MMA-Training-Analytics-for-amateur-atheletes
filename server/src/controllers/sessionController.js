@@ -1,19 +1,24 @@
 const TrainingSession = require('../models/TrainingSession');
 
-// Create New Session (Placeholder before Cloudinary integration)
+// Create New Session with Video Upload
 exports.createSession = async (req, res) => {
     try {
-        const { videoUrl, cloudinaryId } = req.body;
+        if (!req.file) {
+            return res.status(400).json({ message: 'No video file uploaded' });
+        }
 
         const newSession = new TrainingSession({
             user: req.user.id,
-            videoUrl,
-            cloudinaryId,
+            videoUrl: req.file.path, // Cloudinary URL
+            cloudinaryId: req.file.filename,
             status: 'pending'
         });
 
         await newSession.save();
-        res.status(201).json(newSession);
+        res.status(201).json({
+            message: 'Video uploaded successfully. Analysis starting...',
+            session: newSession
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error creating session', error: error.message });
     }

@@ -6,41 +6,41 @@
 ## 🏗️ 1. System Architecture
 We will use a **Microservices Architecture** to separate the web logic from the heavy AI processing.
 
-- **Frontend (Client):** React + Vite (Premium Dark UI)
+- **Frontend (Client):** React + Vite (Premium Performance UI)
 - **Backend (API):** Node.js + Express + MongoDB
 - **ML Service (AI):** Python + Flask + MediaPipe
 - **Cloud Infrastructure:** Cloudinary (Video Storage) + Redis (Queue Management)
 
 ---
 
-## 📅 Phase 1: Foundation & Authentication (Week 1-2)
+## 📅 Phase 1: Foundation & Authentication (COMPLETED) ✅
 *Goal: Setup secure user accounts and the local gym profiles.*
 
-- [ ] **Database Setup:** Implement Mongoose models for `User` and `TrainingSession`.
-- [ ] **Auth System:** JWT-based login/register (specifically for Kathmandu-based athletes).
-- [ ] **User Dashboard:** A "Base Camp" where athletes see their session history and overall progress scores.
+- [x] **Database Setup:** Implement Mongoose models for `User` and `TrainingSession`.
+- [x] **Auth System:** JWT-based login/register with Gmail OTP Verification.
+- [x] **User Dashboard:** Premium Base Camp with sidebar, stats, and real-time session fetching.
 
 ---
 
-## 🎥 Phase 2: Video Management (Week 3-4)
+## 🎥 Phase 2: Video Management (IN PROGRESS) 🏗️
 *Goal: Securely handle heavy video files and prepare for analysis.*
 
-- [ ] **Cloudinary Integration:** Setup Multer for secure video uploads to the cloud.
-- [ ] **Analysis Trigger:** When a video is uploaded, create a "Pending" session record in MongoDB.
-- [ ] **Video Processing Queue:** Implement Redis/Bull to handle video analysis in the background without crashing the server.
+- [x] **Cloudinary Integration:** Setup Multer and Cloudinary for secure video uploads.
+- [x] **Analysis Trigger:** Automatic creation of "Pending" session records in MongoDB.
+- [ ] **Background Processing Queue:** Implement Redis/Bull to manage the handshake between Node.js and the Python AI service.
 
 ---
 
 ## 🤖 Phase 3: The AI "Brain" (Week 5-7) 🧠
-*Goal: The core research part of your dissertation.*
+*Goal: The core research part of the dissertation.*
 
-- [ ] **Python ML Service:** Setup a Flask API that receives a Cloudinary URL.
+- [ ] **Python ML Bridge:** Setup a Flask API that receives a Cloudinary URL and returns skeletal landmarks.
 - [ ] **Striking Module (Shadow Boxing):** 
     - Detect "Guard" position (Wrist vs Ear landmarks).
-    - Measure punch extension and hip pivoting.
+    - Measure punch extension and hip pivoting (using angle calculations).
 - [ ] **Transition Module (Takedown Entry):** 
     - Track "Vertical Hip Displacement" to detect level changes.
-    - Measure the time from "Stance" to "Maximum Depth".
+    - Measure the time from "Stance" to "Maximum Depth" (Explosiveness metric).
 - [ ] **Expert Benchmarking:** Hardcode the "Optimal Angles" (Expert Reference) to compare against athlete data.
 
 ---
@@ -57,17 +57,17 @@ We will use a **Microservices Architecture** to separate the web logic from the 
 ## ⛰️ Phase 5: Local Validation & Dissertation (Week 11-12)
 *Goal: Ensuring the system works for the Kathmandu MMA community.*
 
-- [ ] **Data Collection:** Visit local Kathmandu gyms to record sample footage of amateur athletes.
-- [ ] **Testing:** Compare AI feedback with real-world feedback from a local MMA coach.
-- [ ] **Performance Optimization:** Ensure the system runs smoothly on standard laptops used by students.
+- [ ] **Data Collection:** Gather sample footage from local gyms (e.g., Lock n' Roll, United Kathmandu).
+- [ ] **Testing:** Compare AI feedback with real-world feedback from local coaches.
+- [ ] **Performance Optimization:** Ensure the system runs smoothly on standard student-grade hardware.
 
 ---
 
 ## 🎯 Dissertation Priority Markers (For the High Grade)
-1. **The "Transition" Research:** Focus heavily on the math behind the Takedown Entry. This is your "Unique Research Contribution."
-2. **Kathmandu Focus:** Include a "Local Gym Leaderboard" or "Standardized Test for Valley Athletes" to show local impact.
-3. **Accuracy Comparison:** Include a section comparing the AI's angle calculations vs. manual measurements.
+1. **The "Transition" Research:** Focus heavily on the math behind the Takedown Entry. This is the "Unique Research Contribution."
+2. **Kathmandu Focus:** Include a "Local Gym Leaderboard" to show community impact.
+3. **Accuracy Comparison:** Comparison section: AI calculations vs. manual coaching eye.
 
 ---
 
-**Next Immediate Task:** Setup the **Cloudinary Upload logic** in the Backend so we can start accepting videos for testing.
+**Next Immediate Task:** Setup the **Python AI Service (ML Bridge)** using MediaPipe to start extracting skeletal coordinates from uploaded videos.

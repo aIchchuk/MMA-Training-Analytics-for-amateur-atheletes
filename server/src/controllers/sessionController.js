@@ -15,12 +15,53 @@ exports.createSession = async (req, res) => {
         });
 
         await newSession.save();
+
+        // Trigger AI Analysis Service
+        try {
+            // Non-blocking call to Python service
+            fetch('http://localhost:5001/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    videoUrl: newSession.videoUrl,
+                    sessionId: newSession._id
+                })
+            }).catch(err => console.error("AI Service Error (Async):", err.message));
+
+            // Update status to 'analyzing'
+            newSession.status = 'analyzing';
+            await newSession.save();
+        } catch (aiErr) {
+            console.error("Failed to trigger AI Service:", aiErr.message);
+        }
+
         res.status(201).json({
             message: 'Video uploaded successfully. Analysis starting...',
             session: newSession
         });
     } catch (error) {
         res.status(500).json({ message: 'Error creating session', error: error.message });
+    }
+};
+
+// Update Session Results (Called by Python AI Service)
+exports.updateSessionResults = async (req, res) => {
+    try {
+        const { metrics, feedback, status } = req.body;
+        const session = await TrainingSession.findById(req.params.id);
+
+        if (!session) {
+            return res.status(404).json({ message: 'Session not found' });
+        }
+
+        session.metrics = metrics;
+        session.feedback = feedback;
+        session.status = status || 'completed';
+
+        await session.save();
+        res.status(200).json({ message: 'Session results updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating session results', error: error.message });
     }
 };
 

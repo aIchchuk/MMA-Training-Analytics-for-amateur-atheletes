@@ -8,14 +8,15 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['athlete', 'coach'], default: 'athlete' },
     gym: { type: String, default: 'Independent' }, // Kathmandu Gyms
     level: { type: String, enum: ['beginner', 'amateur', 'pro'], default: 'beginner' },
+    isVerified: { type: Boolean, default: false },
+    verificationCode: { type: String },
     createdAt: { type: Date, default: Date.now }
 });
 
 // Hash password before saving
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
     this.password = await bcrypt.hash(this.password, 10);
-    next();
 });
 
 module.exports = mongoose.model('User', userSchema);

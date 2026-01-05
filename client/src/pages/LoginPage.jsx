@@ -10,11 +10,29 @@ const LoginPage = ({ onNavigate }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate delay for a "premium" feel
-        setTimeout(() => {
-            console.log("Login attempt...", formData);
+
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                onNavigate('dashboard');
+            } else {
+                alert(data.message || "Login failed");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            alert("Could not connect to server. Ensure backend is running.");
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (

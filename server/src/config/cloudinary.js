@@ -20,4 +20,15 @@ const storage = new CloudinaryStorage({
     }
 });
 
-module.exports = { cloudinary, storage };
+const profileStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'mma_athlete_profiles',
+        resource_type: 'image',
+        allowed_formats: ['jpg', 'png', 'jpeg'],
+        transformation: [{ width: 500, height: 500, crop: 'limit' }],
+        public_id: (req, file) => `profile-${req.user.id}`
+    }
+});
+
+module.exports = { cloudinary, storage, profileStorage };

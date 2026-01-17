@@ -8,5 +8,6 @@ router.post('/upload', auth, upload.single('video'), sessionController.createSes
 router.patch('/:id/results', sessionController.updateSessionResults); // Internal route for AI results
 router.get('/', auth, sessionController.getUserSessions);
 router.get('/:id', auth, sessionController.getSessionById);
+router.patch('/:id/notes', auth, sessionController.updateSessionNotes);
 
 module.exports = router;

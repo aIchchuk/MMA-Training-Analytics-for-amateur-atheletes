@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import SessionDetail from './SessionDetail';
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
     LayoutDashboard,
     Activity,
@@ -17,11 +17,11 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Dashboard = ({ onNavigate }) => {
+const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [activeTab, setActiveTab] = useState('overview');
-    const [sessions, setSessions] = useState([]);
-    const [selectedSession, setSelectedSession] = useState(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [uploadFile, setUploadFile] = useState(null);
     const [uploadType, setUploadType] = useState('boxing');
@@ -36,28 +36,8 @@ const Dashboard = ({ onNavigate }) => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        onNavigate('landing');
+        navigate('/');
     };
-
-    // Fetch user sessions
-    const fetchSessions = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/sessions', {
-                headers: { 'x-auth-token': token }
-            });
-            const data = await response.json();
-            if (response.ok) setSessions(data);
-        } catch (error) {
-            console.error("Fetch sessions error:", error);
-        }
-    };
-
-    useEffect(() => {
-        if (activeTab === 'history' || activeTab === 'overview') {
-            fetchSessions();
-        }
-    }, [activeTab]);
 
     const handleUpload = async (e) => {
         e.preventDefault();
@@ -82,8 +62,8 @@ const Dashboard = ({ onNavigate }) => {
                 setIsUploadModalOpen(false);
                 setUploadFile(null);
                 setUploadDescription('');
-                fetchSessions();
                 alert("Upload successful! AI analysis started.");
+                navigate('/history');
             } else {
                 alert(data.message || "Upload failed");
             }
@@ -96,18 +76,14 @@ const Dashboard = ({ onNavigate }) => {
     };
 
     const menuItems = [
-        { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
-        { id: 'analytics', label: 'Performance', icon: <Activity size={20} /> },
-        { id: 'history', label: 'Session History', icon: <History size={20} /> },
-        { id: 'profile', label: 'Athlete Profile', icon: <User size={20} /> },
-        { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+        { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
+        { id: 'analytics', label: 'Performance', icon: <Activity size={20} />, path: '/performance' },
+        { id: 'history', label: 'Session History', icon: <History size={20} />, path: '/history' },
+        { id: 'profile', label: 'Athlete Profile', icon: <User size={20} />, path: '/profile' },
+        { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
     ];
 
-    const stats = {
-        total: sessions.length,
-        completed: sessions.filter(s => s.status === 'completed').length,
-        pending: sessions.filter(s => s.status === 'pending' || s.status === 'analyzing').length
-    };
+    const isActive = (path) => location.pathname === path || (path === '/dashboard' && location.pathname.startsWith('/sessions'));
 
     return (
         <div className="min-h-screen bg-slate-50 flex text-slate-900">
@@ -124,7 +100,7 @@ const Dashboard = ({ onNavigate }) => {
                             <div className="w-10 h-10 bg-mma-blue rounded-xl flex items-center justify-center text-white">
                                 <Swords size={20} />
                             </div>
-                            <div>
+                            <div onClick={() => navigate('/')} className="cursor-pointer">
                                 <div className="text-white font-bold tracking-tight uppercase leading-none">MMA</div>
                                 <div className="text-[10px] text-mma-blue font-black tracking-[0.2em] uppercase">Analytics</div>
                             </div>
@@ -134,8 +110,8 @@ const Dashboard = ({ onNavigate }) => {
                             {menuItems.map((item) => (
                                 <button
                                     key={item.id}
-                                    onClick={() => setActiveTab(item.id)}
-                                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === item.id
+                                    onClick={() => navigate(item.path)}
+                                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-300 ${isActive(item.path)
                                         ? 'bg-mma-blue text-white shadow-lg shadow-blue-500/20'
                                         : 'hover:bg-white/5 hover:text-white'
                                         }`}
@@ -188,162 +164,25 @@ const Dashboard = ({ onNavigate }) => {
                             New Session +
                         </button>
                         <div className="h-8 w-[1px] bg-slate-200 mx-2" />
-                        <div className="flex items-center gap-3 cursor-pointer group">
+                        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/profile')}>
                             <div className="text-right">
                                 <div className="text-xs font-black text-slate-900 uppercase">{athleteName}</div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase">{athleteLevel} • Heavyweight</div>
                             </div>
                             <div className="w-10 h-10 rounded-xl bg-slate-200 border-2 border-white shadow-sm overflow-hidden group-hover:border-mma-blue transition-all">
-                                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${athleteName}`} alt="Profile" />
+                                {savedUser.profileImage ? (
+                                    <img src={savedUser.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${athleteName}`} alt="Profile" />
+                                )}
                             </div>
                         </div>
                     </div>
                 </header>
 
-                {/* Dashboard View */}
+                {/* Content Area */}
                 <div className="p-8 max-w-7xl mx-auto">
-                    <AnimatePresence mode="wait">
-                        {selectedSession ? (
-                            <SessionDetail
-                                key="detail"
-                                sessionId={selectedSession}
-                                onBack={() => setSelectedSession(null)}
-                            />
-                        ) : activeTab === 'overview' ? (
-                            <motion.div
-                                key="overview"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="space-y-10"
-                            >
-                                <div className="mb-10 flex justify-between items-end">
-                                    <div>
-                                        <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-2">Combat Overview</h2>
-                                        <p className="text-slate-500 text-sm font-medium">Performance summary from Kathmandu Performance Lab</p>
-                                    </div>
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-full border border-slate-200">
-                                        Last Updated: {new Date().toLocaleDateString()}
-                                    </div>
-                                </div>
-
-                                {/* Stats Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                    {[
-                                        { label: 'Total Sessions', value: stats.total, icon: <LayoutDashboard className="text-mma-blue" />, sub: 'All saved data' },
-                                        { label: 'AI Completed', value: stats.completed, icon: <Activity className="text-emerald-500" />, sub: 'Analyzed & Scored' },
-                                        { label: 'In Queue', value: stats.pending, icon: <Activity className="text-orange-500" />, sub: 'Processing...' }
-                                    ].map((stat, i) => (
-                                        <div key={i} className="premium-card p-10 rounded-[40px] hover-scale">
-                                            <div className="flex items-center gap-4 mb-4">
-                                                <div className="w-10 h-10 bg-slate-50 rounded-2xl flex items-center justify-center">
-                                                    {stat.icon}
-                                                </div>
-                                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</div>
-                                            </div>
-                                            <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">{stat.value}</div>
-                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{stat.sub}</div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Main Analytics Grid */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                    <div className="premium-card p-10 rounded-[40px]">
-                                        <div className="flex items-center justify-between mb-8">
-                                            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
-                                                <Activity size={18} className="text-mma-blue" />
-                                                Performance Trend
-                                            </h3>
-                                            <div className="px-3 py-1 bg-slate-100 rounded-full text-[8px] font-black uppercase text-slate-400 tracking-widest">Last 30 Days</div>
-                                        </div>
-                                        <div className="h-[300px] flex items-center justify-center border-2 border-dashed border-slate-100 rounded-[30px] text-slate-400 text-[10px] font-bold uppercase tracking-widest bg-slate-50/50">
-                                            AI Analytics Chart Placeholder
-                                        </div>
-                                    </div>
-                                    <div className="premium-card p-10 rounded-[40px]">
-                                        <div className="flex items-center justify-between mb-8">
-                                            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
-                                                <Activity size={18} className="text-mma-blue" />
-                                                Strike Accuracy
-                                            </h3>
-                                            <div className="px-3 py-1 bg-slate-100 rounded-full text-[8px] font-black uppercase text-slate-400 tracking-widest">AI Detection</div>
-                                        </div>
-                                        <div className="h-[300px] flex items-center justify-center border-2 border-dashed border-slate-100 rounded-[30px] text-slate-400 text-[10px] font-bold uppercase tracking-widest bg-slate-50/50">
-                                            Accuracy Visualization Placeholder
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ) : activeTab === 'history' ? (
-                            <motion.div
-                                key="history"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="premium-card p-10 rounded-[40px]"
-                            >
-                                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-8 flex items-center gap-3">
-                                    <Activity size={18} className="text-mma-blue" />
-                                    Biometric Session History
-                                </h3>
-
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="border-b border-slate-100">
-                                                <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date / Time</th>
-                                                <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Session ID</th>
-                                                <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                                                <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-50">
-                                            {sessions.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="4" className="py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">No training sessions found.</td>
-                                                </tr>
-                                            ) : (
-                                                sessions.map((session) => (
-                                                    <tr key={session._id} className="group hover:bg-slate-50/50 transition-colors">
-                                                        <td className="py-8">
-                                                            <div className="text-xs font-bold text-slate-900">{new Date(session.createdAt).toLocaleDateString()}</div>
-                                                            <div className="text-[10px] text-slate-400 font-medium">{new Date(session.createdAt).toLocaleTimeString()}</div>
-                                                        </td>
-                                                        <td className="py-8">
-                                                            <span className="px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-mono font-bold text-slate-600">
-                                                                #{session._id.slice(-6).toUpperCase()}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-8">
-                                                            <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${session.status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
-                                                                session.status === 'pending' || session.status === 'analyzing' ? 'bg-mma-blue/10 text-mma-blue animate-pulse' :
-                                                                    'bg-red-100 text-red-600'
-                                                                }`}>
-                                                                {session.status}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-8 text-right">
-                                                            <button
-                                                                onClick={() => setSelectedSession(session._id)}
-                                                                className="px-6 py-2.5 bg-slate-900 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-mma-blue transition-all"
-                                                            >
-                                                                View Analysis
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <div key="other" className="flex items-center justify-center p-20 border-2 border-dashed border-slate-100 rounded-[40px] text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                                Module Under Development
-                            </div>
-                        )}
-                    </AnimatePresence>
+                    <Outlet />
                 </div>
             </main>
 
@@ -469,4 +308,4 @@ const Dashboard = ({ onNavigate }) => {
     );
 };
 
-export default Dashboard;
+export default DashboardLayout;

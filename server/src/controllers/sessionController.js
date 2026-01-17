@@ -7,10 +7,13 @@ exports.createSession = async (req, res) => {
             return res.status(400).json({ message: 'No video file uploaded' });
         }
 
+        const { sessionType, description } = req.body;
         const newSession = new TrainingSession({
             user: req.user.id,
             videoUrl: req.file.path, // Cloudinary URL
             cloudinaryId: req.file.filename,
+            sessionType: sessionType || 'boxing',
+            description: description || '',
             status: 'pending'
         });
 
@@ -18,14 +21,15 @@ exports.createSession = async (req, res) => {
 
         // Trigger AI Analysis Service
         try {
-            console.log(`📡 Triggering AI Service for Session: ${newSession._id}`);
+            console.log(`📡 Triggering AI Service for Session: ${newSession._id} Type: ${newSession.sessionType}`);
             // Non-blocking call to Python service - using 127.0.0.1 to avoid localhost IPv6 issues
             fetch('http://127.0.0.1:5001/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     videoUrl: newSession.videoUrl,
-                    sessionId: newSession._id
+                    sessionId: newSession._id,
+                    sessionType: newSession.sessionType
                 })
             }).then(resp => {
                 console.log(`🤖 AI Service Response Status: ${resp.status}`);
@@ -52,15 +56,17 @@ exports.createSession = async (req, res) => {
 // Update Session Results (Called by Python AI Service)
 exports.updateSessionResults = async (req, res) => {
     try {
-        const { metrics, feedback, status } = req.body;
+        const { metrics, feedback, status, annotatedVideoUrl, analysisSummary } = req.body;
         const session = await TrainingSession.findById(req.params.id);
 
         if (!session) {
             return res.status(404).json({ message: 'Session not found' });
         }
 
-        session.metrics = metrics;
-        session.feedback = feedback;
+        if (metrics) session.metrics = metrics;
+        if (feedback) session.feedback = feedback;
+        if (annotatedVideoUrl) session.annotatedVideoUrl = annotatedVideoUrl;
+        if (analysisSummary) session.analysisSummary = analysisSummary;
         session.status = status || 'completed';
 
         await session.save();
@@ -77,6 +83,25 @@ exports.getUserSessions = async (req, res) => {
         res.json(sessions);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching sessions', error: error.message });
+    }
+};
+
+// Update Session Notes (User/Coach Feedback)
+exports.updateSessionNotes = async (req, res) => {
+    try {
+        const { coachNotes } = req.body;
+        const session = await TrainingSession.findOne({ _id: req.params.id, user: req.user.id });
+
+        if (!session) {
+            return res.status(404).json({ message: 'Session not found' });
+        }
+
+        session.coachNotes = coachNotes;
+        await session.save();
+
+        res.json({ message: 'Feedback updated successfully', coachNotes: session.coachNotes });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating feedback', error: error.message });
     }
 };
 

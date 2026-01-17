@@ -20,7 +20,7 @@ app.use(express.json());
 // Rate Limiting (Protects from brute force)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 1000 // limit each IP to 1000 requests per windowMs
 });
 app.use('/api/', limiter);
 
@@ -37,6 +37,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/sessions', require('./routes/sessionRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {

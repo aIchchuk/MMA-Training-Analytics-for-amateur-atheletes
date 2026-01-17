@@ -3,15 +3,27 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import Dashboard from './pages/Dashboard';
+import DashboardLayout from './components/DashboardLayout';
+import Overview from './pages/dashboard/Overview';
+import Performance from './pages/dashboard/Performance';
+import SessionHistory from './pages/dashboard/SessionHistory';
+import Profile from './pages/dashboard/Profile';
+import Settings from './pages/dashboard/Settings';
+import SessionDetail from './pages/SessionDetail';
 import { Swords, Menu } from 'lucide-react';
 
 function Navigation() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Hide navigation on dashboard
-    if (location.pathname === '/dashboard') return null;
+    const isDashboardRoute = location.pathname.startsWith('/dashboard') ||
+        location.pathname.startsWith('/performance') ||
+        location.pathname.startsWith('/history') ||
+        location.pathname.startsWith('/profile') ||
+        location.pathname.startsWith('/settings') ||
+        location.pathname.startsWith('/sessions');
+
+    if (isDashboardRoute) return null;
 
     return (
         <nav className="px-6 lg:px-20 py-6 flex justify-between items-center nav-blur sticky top-0 z-[100]">
@@ -65,8 +77,14 @@ function Navigation() {
 function Footer() {
     const location = useLocation();
 
-    // Hide footer on dashboard
-    if (location.pathname === '/dashboard') return null;
+    const isDashboardRoute = location.pathname.startsWith('/dashboard') ||
+        location.pathname.startsWith('/performance') ||
+        location.pathname.startsWith('/history') ||
+        location.pathname.startsWith('/profile') ||
+        location.pathname.startsWith('/settings') ||
+        location.pathname.startsWith('/sessions');
+
+    if (isDashboardRoute) return null;
 
     return (
         <footer className="py-12 border-t border-slate-200 nav-blur text-center mt-20">
@@ -90,7 +108,16 @@ function MainContent() {
                 <Route path="/" element={<LandingPage onNavigate={(page) => navigate(`/${page === 'landing' ? '' : page}`)} />} />
                 <Route path="/login" element={<LoginPage onNavigate={(page) => navigate(`/${page === 'landing' ? '' : page}`)} />} />
                 <Route path="/register" element={<RegisterPage onNavigate={(page) => navigate(`/${page === 'landing' ? '' : page}`)} />} />
-                <Route path="/dashboard" element={<Dashboard onNavigate={(page) => navigate(`/${page === 'landing' ? '' : page}`)} />} />
+
+                {/* Authenticated Dashboard Routes */}
+                <Route element={<DashboardLayout />}>
+                    <Route path="/dashboard" element={<Overview />} />
+                    <Route path="/performance" element={<Performance />} />
+                    <Route path="/history" element={<SessionHistory />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/sessions/:sessionId" element={<SessionDetail />} />
+                </Route>
             </Routes>
         </main>
     );

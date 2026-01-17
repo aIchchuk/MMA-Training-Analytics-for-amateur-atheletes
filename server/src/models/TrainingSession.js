@@ -22,6 +22,19 @@ const trainingSessionSchema = new mongoose.Schema({
         severity: { type: String, enum: ['low', 'medium', 'high'] }
     }],
 
+    annotatedVideoUrl: { type: String },
+    sessionType: {
+        type: String,
+        enum: ['boxing', 'muay_thai', 'grappling', 'sparring'],
+        default: 'boxing'
+    },
+    description: { type: String },
+    coachNotes: { type: String },
+    analysisSummary: {
+        strengths: [String],
+        flaws: [String],
+        improvements: [String]
+    },
     status: { type: String, enum: ['pending', 'analyzing', 'completed', 'failed'], default: 'pending' }
 }, { timestamps: true });
 

@@ -8,6 +8,11 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['athlete', 'coach'], default: 'athlete' },
     gym: { type: String, default: 'Independent' }, // Kathmandu Gyms
     level: { type: String, enum: ['beginner', 'amateur', 'pro'], default: 'beginner' },
+    weight: { type: Number },
+    division: { type: String },
+    background: { type: String }, // e.g. 'Striker', 'Wrestler'
+    history: { type: String },
+    profileImage: { type: String },
     isVerified: { type: Boolean, default: false },
     verificationCode: { type: String },
     createdAt: { type: Date, default: Date.now }

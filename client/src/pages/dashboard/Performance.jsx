@@ -52,17 +52,40 @@ const Performance = () => {
         }
     };
 
+    // Calculate Real Stats from Sessions
+    const calculateStats = () => {
+        if (!sessions.length) return { volume: 0, accuracy: 0, speed: 0, intensity: 0 };
+
+        const total = sessions.length;
+        const totalVolume = sessions.reduce((sum, s) => sum + (s.metrics?.strikeVolume || 0), 0); // Total strikes/extensions
+        const totalAccuracy = sessions.reduce((sum, s) => sum + (s.metrics?.accuracyScore || 0), 0);
+        const totalSpeed = sessions.reduce((sum, s) => sum + (s.metrics?.takedownSpeed || 0), 0);
+
+        // Intensity based on guard stability + accuracy (mock logic for now)
+        const totalIntensity = sessions.reduce((sum, s) => sum + ((s.metrics?.guardStability || 0) / 10), 0);
+
+        return {
+            volume: Math.round(totalVolume / total) || 0,
+            accuracy: Math.round(totalAccuracy / total) || 0,
+            speed: Math.round(totalSpeed / total) || 0,
+            intensity: (totalIntensity / total).toFixed(1) || 0
+        };
+    };
+
+    const stats = calculateStats();
+
     // Prepare data for Trend Chart
     const trendData = sessions.slice().reverse().map(s => ({
         date: new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        power: s.metrics?.averageImpactForce || Math.floor(Math.random() * 200) + 400, // Fallback for demo
-        speed: s.metrics?.strikeSpeed || Math.floor(Math.random() * 5) + 8
+        volume: s.metrics?.strikeVolume || 0,
+        accuracy: s.metrics?.accuracyScore || 0
     }));
 
     // Prepare data for Discipline Pie Chart
     const disciplineCounts = sessions.reduce((acc, s) => {
         const type = s.sessionType || 'boxing';
-        acc[type] = (acc[type] || 0) + 1;
+        const typeKey = typeof type === 'string' ? type.split(',')[0] : 'mixed'; // Handle multi-types
+        acc[typeKey] = (acc[typeKey] || 0) + 1;
         return acc;
     }, {});
 
@@ -84,8 +107,8 @@ const Performance = () => {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-2">Biometric Analytics</h2>
-                    <p className="text-slate-500 text-sm font-medium">Advanced performance tracking from Kathmandu Performance Lab</p>
+                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-2">Performance Analytics</h2>
+                    <p className="text-slate-500 text-sm font-medium">Advanced performance tracking</p>
                 </div>
                 <div className="flex gap-3">
                     <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
@@ -109,10 +132,10 @@ const Performance = () => {
             {/* Top Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
-                    { label: 'Avg Strike Power', value: '682N', icon: <Zap size={18} />, trend: '+12%', color: 'text-mma-blue' },
-                    { label: 'Form Accuracy', value: '84%', icon: <Target size={18} />, trend: '+5%', color: 'text-emerald-500' },
-                    { label: 'Reaction Time', value: '240ms', icon: <Activity size={18} />, trend: '-18ms', color: 'text-orange-500' },
-                    { label: 'Intensity Score', value: '8.2', icon: <TrendingUp size={18} />, trend: 'Peak', color: 'text-purple-500' }
+                    { label: 'Avg Session Volume', value: `${stats.volume}`, icon: <Activity size={18} />, trend: '+12%', color: 'text-mma-blue' },
+                    { label: 'Form Accuracy', value: `${stats.accuracy}%`, icon: <Target size={18} />, trend: '+5%', color: 'text-emerald-500' },
+                    { label: 'Takedown Depth', value: `${stats.speed}cm`, icon: <Zap size={18} />, trend: 'Stable', color: 'text-orange-500' },
+                    { label: 'Intensity Score', value: stats.intensity, icon: <TrendingUp size={18} />, trend: 'Peak', color: 'text-purple-500' }
                 ].map((stat, i) => (
                     <div key={i} className="premium-card p-8 rounded-[35px] hover-scale group">
                         <div className="flex items-center justify-between mb-4">
@@ -135,9 +158,9 @@ const Performance = () => {
                         <div>
                             <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
                                 <TrendingUp size={18} className="text-mma-blue" />
-                                Impact Force Progression
+                                Training Volume & Accuracy
                             </h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Measured in Newtons (N) per Hit</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Strikes vs Form Accuracy</p>
                         </div>
                         <div className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[9px] font-black text-slate-600 uppercase tracking-widest">
                             AI Calibrated
@@ -148,9 +171,13 @@ const Performance = () => {
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={trendData}>
                                 <defs>
-                                    <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
+                                    <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1} />
                                         <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="colorAccuracy" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -178,11 +205,21 @@ const Performance = () => {
                                 />
                                 <Area
                                     type="monotone"
-                                    dataKey="power"
+                                    dataKey="volume"
                                     stroke="#2563eb"
-                                    strokeWidth={4}
+                                    strokeWidth={3}
                                     fillOpacity={1}
-                                    fill="url(#colorPower)"
+                                    fill="url(#colorVolume)"
+                                    name="Volume"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="accuracy"
+                                    stroke="#10b981"
+                                    strokeWidth={3}
+                                    fillOpacity={0.6}
+                                    fill="url(#colorAccuracy)"
+                                    name="Accuracy %"
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -234,22 +271,7 @@ const Performance = () => {
 
             {/* Secondary Insights Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="premium-card p-10 rounded-[40px]">
-                    <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Monthly Workload</h3>
-                        <Calendar size={18} className="text-slate-400" />
-                    </div>
-                    <div className="h-[250px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={trendData.slice(-7)}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="date" hide />
-                                <Tooltip cursor={{ fill: 'transparent' }} />
-                                <Bar dataKey="power" fill="#2563eb" radius={[10, 10, 10, 10]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
+
 
                 <div className="bg-slate-900 rounded-[40px] p-12 text-white overflow-hidden relative group">
                     <div className="relative z-10 flex flex-col h-full justify-between">
@@ -262,9 +284,7 @@ const Performance = () => {
                                 Your impact force has increased by <span className="text-white font-bold">12%</span> in the last 7 days. Your left hook velocity is consistently peaking in the 2nd round. Suggesting focus on <span className="text-mma-blue font-bold">Hip Rotation Torque</span> drills next.
                             </p>
                         </div>
-                        <button className="mt-8 bg-white/10 hover:bg-white/20 transition-all border border-white/10 py-4 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center">
-                            Open Full Analysis Report
-                        </button>
+
                     </div>
                     {/* Decorative Elements */}
                     <div className="absolute -top-20 -right-20 w-64 h-64 bg-mma-blue/10 rounded-full blur-3xl" />

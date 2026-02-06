@@ -24,7 +24,7 @@ const DashboardLayout = () => {
 
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [uploadFile, setUploadFile] = useState(null);
-    const [uploadType, setUploadType] = useState('boxing');
+    const [uploadTypes, setUploadTypes] = useState(['striking_shadow']);
     const [uploadDescription, setUploadDescription] = useState('');
     const [isUploading, setIsUploading] = useState(false);
 
@@ -46,7 +46,7 @@ const DashboardLayout = () => {
         setIsUploading(true);
         const formData = new FormData();
         formData.append('video', uploadFile);
-        formData.append('sessionType', uploadType);
+        formData.append('sessionType', uploadTypes.join(','));
         formData.append('description', uploadDescription);
 
         try {
@@ -80,7 +80,7 @@ const DashboardLayout = () => {
         { id: 'analytics', label: 'Performance', icon: <Activity size={20} />, path: '/performance' },
         { id: 'history', label: 'Session History', icon: <History size={20} />, path: '/history' },
         { id: 'profile', label: 'Athlete Profile', icon: <User size={20} />, path: '/profile' },
-        { id: 'settings', label: 'Settings', icon: <Settings size={20} />, path: '/settings' },
+
     ];
 
     const isActive = (path) => location.pathname === path || (path === '/dashboard' && location.pathname.startsWith('/sessions'));
@@ -167,7 +167,7 @@ const DashboardLayout = () => {
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/profile')}>
                             <div className="text-right">
                                 <div className="text-xs font-black text-slate-900 uppercase">{athleteName}</div>
-                                <div className="text-[10px] font-bold text-slate-400 uppercase">{athleteLevel} • Heavyweight</div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase">{athleteLevel}</div>
                             </div>
                             <div className="w-10 h-10 rounded-xl bg-slate-200 border-2 border-white shadow-sm overflow-hidden group-hover:border-mma-blue transition-all">
                                 {savedUser.profileImage ? (
@@ -205,7 +205,7 @@ const DashboardLayout = () => {
                         >
                             <div className="mb-8 text-center">
                                 <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Upload Session</h3>
-                                <p className="text-slate-500 text-sm font-medium">Video will be processed by Kathmandu AI Lab</p>
+                                <p className="text-slate-500 text-sm font-medium">Video will be processed here</p>
                             </div>
 
                             <form onSubmit={handleUpload} className="space-y-8">
@@ -240,29 +240,36 @@ const DashboardLayout = () => {
 
                                 {/* Session Type Selection */}
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Select Session Discipline</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Select Session Disciplines</label>
                                     <div className="grid grid-cols-2 gap-3">
                                         {[
-                                            { id: 'boxing', label: 'Boxing Shadow', icon: <Swords size={14} /> },
-                                            { id: 'muay_thai', label: 'Muay Thai', icon: <Swords size={14} /> },
-                                            { id: 'grappling', label: 'Grappling Drills', icon: <Activity size={14} /> },
-                                            { id: 'sparring', label: 'Light Sparring', icon: <Activity size={14} /> }
-                                        ].map((type) => (
-                                            <button
-                                                key={type.id}
-                                                type="button"
-                                                onClick={() => setUploadType(type.id)}
-                                                className={`flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all ${uploadType === type.id
-                                                    ? 'border-mma-blue bg-blue-50 text-mma-blue shadow-sm'
-                                                    : 'border-slate-100 text-slate-400 hover:border-slate-200'
-                                                    }`}
-                                            >
-                                                <div className={`p-2 rounded-lg ${uploadType === type.id ? 'bg-mma-blue text-white' : 'bg-slate-100'}`}>
-                                                    {type.icon}
-                                                </div>
-                                                <span className="text-[10px] font-black uppercase tracking-tight">{type.label}</span>
-                                            </button>
-                                        ))}
+                                            { id: 'striking_shadow', label: 'Striking Shadow', icon: <Swords size={14} /> },
+                                            { id: 'takedown_drills', label: 'Takedown Drills', icon: <Activity size={14} /> }
+                                        ].map((type) => {
+                                            const isSelected = uploadTypes.includes(type.id);
+                                            return (
+                                                <button
+                                                    key={type.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setUploadTypes(prev => prev.filter(t => t !== type.id));
+                                                        } else {
+                                                            setUploadTypes(prev => [...prev, type.id]);
+                                                        }
+                                                    }}
+                                                    className={`flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all ${isSelected
+                                                        ? 'border-mma-blue bg-blue-50 text-mma-blue shadow-sm'
+                                                        : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                                                        }`}
+                                                >
+                                                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-mma-blue text-white' : 'bg-slate-100'}`}>
+                                                        {type.icon}
+                                                    </div>
+                                                    <span className="text-[10px] font-black uppercase tracking-tight">{type.label}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 

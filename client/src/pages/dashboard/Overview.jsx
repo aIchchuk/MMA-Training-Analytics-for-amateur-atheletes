@@ -39,7 +39,7 @@ const Overview = () => {
             <div className="mb-10 flex justify-between items-end">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-2">Combat Overview</h2>
-                    <p className="text-slate-500 text-sm font-medium">Performance summary from Kathmandu Performance Lab</p>
+                    <p className="text-slate-500 text-sm font-medium">Performance summary</p>
                 </div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-full border border-slate-200">
                     Last Updated: {new Date().toLocaleDateString()}

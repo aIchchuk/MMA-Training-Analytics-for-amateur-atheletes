@@ -202,8 +202,7 @@ const Profile = () => {
                                         <option value="Lightweight">Lightweight (155 lbs)</option>
                                         <option value="Welterweight">Welterweight (170 lbs)</option>
                                         <option value="Middleweight">Middleweight (185 lbs)</option>
-                                        <option value="Light Heavyweight">Light Heavyweight (205 lbs)</option>
-                                        <option value="Heavyweight">Heavyweight (265 lbs)</option>
+
                                     </select>
                                 </div>
                                 <div className="space-y-3">

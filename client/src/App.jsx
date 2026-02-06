@@ -41,13 +41,7 @@ function Navigation() {
             </div>
 
             <div className="hidden md:flex items-center gap-10">
-                <div className="flex gap-8 text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                    <span className="hover:text-mma-blue cursor-pointer transition-colors">Technology</span>
-                    <span className="hover:text-mma-blue cursor-pointer transition-colors">Academy</span>
-                    <span className="hover:text-mma-blue cursor-pointer transition-colors">Network</span>
-                </div>
-
-                <div className="flex items-center gap-2 pl-6 border-l border-slate-200">
+                <div className="flex items-center gap-2">
                     {location.pathname !== '/login' && (
                         <button
                             onClick={() => navigate('/login')}

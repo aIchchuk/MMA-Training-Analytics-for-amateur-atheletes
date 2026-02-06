@@ -24,7 +24,7 @@ const Dashboard = ({ onNavigate }) => {
     const [selectedSession, setSelectedSession] = useState(null);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [uploadFile, setUploadFile] = useState(null);
-    const [uploadType, setUploadType] = useState('boxing');
+    const [uploadTypes, setUploadTypes] = useState(['striking_shadow']);
     const [uploadDescription, setUploadDescription] = useState('');
     const [isUploading, setIsUploading] = useState(false);
 
@@ -66,7 +66,7 @@ const Dashboard = ({ onNavigate }) => {
         setIsUploading(true);
         const formData = new FormData();
         formData.append('video', uploadFile);
-        formData.append('sessionType', uploadType);
+        formData.append('sessionType', uploadTypes.join(','));
         formData.append('description', uploadDescription);
 
         try {
@@ -220,7 +220,7 @@ const Dashboard = ({ onNavigate }) => {
                                 <div className="mb-10 flex justify-between items-end">
                                     <div>
                                         <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-2">Combat Overview</h2>
-                                        <p className="text-slate-500 text-sm font-medium">Performance summary from Kathmandu Performance Lab</p>
+                                        <p className="text-slate-500 text-sm font-medium">Performance summary </p>
                                     </div>
                                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-full border border-slate-200">
                                         Last Updated: {new Date().toLocaleDateString()}
@@ -366,7 +366,7 @@ const Dashboard = ({ onNavigate }) => {
                         >
                             <div className="mb-8 text-center">
                                 <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Upload Session</h3>
-                                <p className="text-slate-500 text-sm font-medium">Video will be processed by Kathmandu AI Lab</p>
+                                <p className="text-slate-500 text-sm font-medium">Video will be processed soon</p>
                             </div>
 
                             <form onSubmit={handleUpload} className="space-y-8">
@@ -401,29 +401,36 @@ const Dashboard = ({ onNavigate }) => {
 
                                 {/* Session Type Selection */}
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Select Session Discipline</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Select Session Disciplines</label>
                                     <div className="grid grid-cols-2 gap-3">
                                         {[
-                                            { id: 'boxing', label: 'Boxing Shadow', icon: <Swords size={14} /> },
-                                            { id: 'muay_thai', label: 'Muay Thai', icon: <Swords size={14} /> },
-                                            { id: 'grappling', label: 'Grappling Drills', icon: <Activity size={14} /> },
-                                            { id: 'sparring', label: 'Light Sparring', icon: <Activity size={14} /> }
-                                        ].map((type) => (
-                                            <button
-                                                key={type.id}
-                                                type="button"
-                                                onClick={() => setUploadType(type.id)}
-                                                className={`flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all ${uploadType === type.id
-                                                    ? 'border-mma-blue bg-blue-50 text-mma-blue shadow-sm'
-                                                    : 'border-slate-100 text-slate-400 hover:border-slate-200'
-                                                    }`}
-                                            >
-                                                <div className={`p-2 rounded-lg ${uploadType === type.id ? 'bg-mma-blue text-white' : 'bg-slate-100'}`}>
-                                                    {type.icon}
-                                                </div>
-                                                <span className="text-[10px] font-black uppercase tracking-tight">{type.label}</span>
-                                            </button>
-                                        ))}
+                                            { id: 'striking_shadow', label: 'Striking Shadow', icon: <Swords size={14} /> },
+                                            { id: 'takedown_drills', label: 'Takedown Drills', icon: <Activity size={14} /> }
+                                        ].map((type) => {
+                                            const isSelected = uploadTypes.includes(type.id);
+                                            return (
+                                                <button
+                                                    key={type.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setUploadTypes(prev => prev.filter(t => t !== type.id));
+                                                        } else {
+                                                            setUploadTypes(prev => [...prev, type.id]);
+                                                        }
+                                                    }}
+                                                    className={`flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all ${isSelected
+                                                        ? 'border-mma-blue bg-blue-50 text-mma-blue shadow-sm'
+                                                        : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                                                        }`}
+                                                >
+                                                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-mma-blue text-white' : 'bg-slate-100'}`}>
+                                                        {type.icon}
+                                                    </div>
+                                                    <span className="text-[10px] font-black uppercase tracking-tight">{type.label}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 

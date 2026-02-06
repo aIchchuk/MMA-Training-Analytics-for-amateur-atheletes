@@ -24,9 +24,7 @@ const trainingSessionSchema = new mongoose.Schema({
 
     annotatedVideoUrl: { type: String },
     sessionType: {
-        type: String,
-        enum: ['boxing', 'muay_thai', 'grappling', 'sparring'],
-        default: 'boxing'
+        type: String
     },
     description: { type: String },
     coachNotes: { type: String },

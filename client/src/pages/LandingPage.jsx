@@ -94,23 +94,7 @@ const LandingPage = ({ onNavigate }) => {
                 </div>
             </section>
 
-            {/* Dynamic Glass Stats Panel */}
-            <div className="max-w-7xl mx-auto px-6 mb-40">
-                <div className="premium-card rounded-[50px] p-10 md:p-16 flex flex-wrap justify-around gap-12 text-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-blue-50/20 mix-blend-overlay pointer-events-none" />
-                    {[
-                        { label: "Analyses", val: "2,400+" },
-                        { label: "Gyms", val: "12" },
-                        { label: "Accuracy", val: "94%" },
-                        { label: "Real-time", val: "42ms" }
-                    ].map((s, idx) => (
-                        <div key={idx} className="relative z-10">
-                            <div className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-2">{s.val}</div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{s.label}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+
         </div>
     );
 };

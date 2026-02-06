@@ -155,7 +155,9 @@ def analyze_video_task(video_url, session_id):
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
+    print("📥 Received analysis request...")
     data = request.json
+    print(f"📦 Request Data: {data}")
     video_url = data.get('videoUrl')
     session_id = data.get('sessionId')
 

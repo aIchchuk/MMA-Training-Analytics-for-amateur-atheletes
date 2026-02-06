@@ -18,21 +18,26 @@ exports.createSession = async (req, res) => {
 
         // Trigger AI Analysis Service
         try {
-            // Non-blocking call to Python service
-            fetch('http://localhost:5001/analyze', {
+            console.log(`📡 Triggering AI Service for Session: ${newSession._id}`);
+            // Non-blocking call to Python service - using 127.0.0.1 to avoid localhost IPv6 issues
+            fetch('http://127.0.0.1:5001/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     videoUrl: newSession.videoUrl,
                     sessionId: newSession._id
                 })
-            }).catch(err => console.error("AI Service Error (Async):", err.message));
+            }).then(resp => {
+                console.log(`🤖 AI Service Response Status: ${resp.status}`);
+            }).catch(err => {
+                console.error("❌ AI Service Error (Async):", err.message);
+            });
 
             // Update status to 'analyzing'
             newSession.status = 'analyzing';
             await newSession.save();
         } catch (aiErr) {
-            console.error("Failed to trigger AI Service:", aiErr.message);
+            console.error("❌ Failed to trigger AI Service:", aiErr.message);
         }
 
         res.status(201).json({
